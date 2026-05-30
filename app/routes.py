@@ -14,6 +14,21 @@ def form_value(name, default=""):
     return request.form.get(name, default).strip()
 
 
+def ensure_customer_device(customer_id):
+    if not customer_id:
+        return None
+    customer_id = int(customer_id)
+    device = Device.query.filter_by(customer_id=customer_id).order_by(Device.id.asc()).first()
+    if device:
+        return device.id
+    customer = db.session.get(Customer, customer_id)
+    name = f"{customer.name}-默认设备" if customer else "默认设备"
+    device = Device(name=name, customer_id=customer_id, remark="系统自动创建，用于兼容续费和远程信息")
+    db.session.add(device)
+    db.session.flush()
+    return device.id
+
+
 @bp.route("/")
 @login_required
 def dashboard():
@@ -21,7 +36,7 @@ def dashboard():
     renewals = Renewal.query.all()
     stats = {
         "customers": Customer.query.count(),
-        "devices": Device.query.count(),
+        "lines": Line.query.count(),
         "expiring_7": sum(1 for r in renewals if 0 <= (r.expire_date - today).days <= 7 and r.status != "已续费"),
         "expiring_3": sum(1 for r in renewals if 0 <= (r.expire_date - today).days <= 3 and r.status != "已续费"),
         "expired": sum(1 for r in renewals if (r.expire_date - today).days < 0 and r.status != "已续费"),
@@ -64,7 +79,15 @@ def customer_form(item_id=None):
 @bp.route("/customers/<int:item_id>")
 @login_required
 def customer_detail(item_id):
-    return render_template("customer_detail.html", item=Customer.query.get_or_404(item_id))
+    item = Customer.query.get_or_404(item_id)
+    lines = Line.query.filter_by(customer_id=item.id).order_by(Line.id.desc()).all()
+    remotes = (
+        RemoteAccess.query.outerjoin(Device)
+        .filter((RemoteAccess.customer_id == item.id) | (Device.customer_id == item.id))
+        .order_by(RemoteAccess.id.desc())
+        .all()
+    )
+    return render_template("customer_detail.html", item=item, lines=lines, remotes=remotes)
 
 
 @bp.route("/customers/<int:item_id>/delete", methods=["POST"])
@@ -123,9 +146,9 @@ def device_delete(item_id):
 @login_required
 def lines():
     q = request.args.get("q", "").strip()
-    query = Line.query
+    query = Line.query.outerjoin(Customer)
     if q:
-        query = query.filter((Line.code.like(f"%{q}%")) | (Line.country.like(f"%{q}%")) | (Line.remark.like(f"%{q}%")))
+        query = query.filter((Line.code.like(f"%{q}%")) | (Line.country.like(f"%{q}%")) | (Line.remark.like(f"%{q}%")) | (Customer.name.like(f"%{q}%")))
     return render_template("lines.html", items=query.order_by(Line.id.desc()).all(), q=q)
 
 
@@ -135,6 +158,7 @@ def lines():
 def line_form(item_id=None):
     item = db.session.get(Line, item_id) if item_id else Line()
     if request.method == "POST":
+        item.customer_id = request.form.get("customer_id") or None
         item.code = form_value("code")
         item.country = form_value("country")
         item.line_type = form_value("line_type")
@@ -143,7 +167,7 @@ def line_form(item_id=None):
         db.session.commit()
         flash("线路信息已保存", "success")
         return redirect(url_for("main.lines"))
-    return render_template("line_form.html", item=item)
+    return render_template("line_form.html", item=item, customers=Customer.query.order_by(Customer.name).all())
 
 
 @bp.route("/lines/<int:item_id>/delete", methods=["POST"])
@@ -159,9 +183,9 @@ def line_delete(item_id):
 @login_required
 def remotes():
     q = request.args.get("q", "").strip()
-    query = RemoteAccess.query
+    query = RemoteAccess.query.outerjoin(Customer, RemoteAccess.customer_id == Customer.id)
     if q:
-        query = query.filter((RemoteAccess.address.like(f"%{q}%")) | (RemoteAccess.username.like(f"%{q}%")) | (RemoteAccess.remark.like(f"%{q}%")))
+        query = query.filter((RemoteAccess.address.like(f"%{q}%")) | (RemoteAccess.username.like(f"%{q}%")) | (RemoteAccess.remark.like(f"%{q}%")) | (Customer.name.like(f"%{q}%")))
     return render_template("remotes.html", items=query.order_by(RemoteAccess.id.desc()).all(), q=q)
 
 
@@ -171,7 +195,8 @@ def remotes():
 def remote_form(item_id=None):
     item = db.session.get(RemoteAccess, item_id) if item_id else RemoteAccess()
     if request.method == "POST":
-        item.device_id = request.form.get("device_id")
+        item.customer_id = request.form.get("customer_id") or None
+        item.device_id = ensure_customer_device(item.customer_id)
         item.address = form_value("address")
         item.username = form_value("username")
         item.password = request.form.get("password", "")
@@ -180,7 +205,8 @@ def remote_form(item_id=None):
         db.session.commit()
         flash("远程管理信息已保存", "success")
         return redirect(url_for("main.remotes"))
-    return render_template("remote_form.html", item=item, devices=Device.query.order_by(Device.name).all())
+    customer_id = item.customer_id or (item.device.customer_id if item.device else None)
+    return render_template("remote_form.html", item=item, customer_id=customer_id, customers=Customer.query.order_by(Customer.name).all())
 
 
 @bp.route("/remotes/<int:item_id>/delete", methods=["POST"])

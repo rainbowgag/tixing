@@ -11,6 +11,19 @@ login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 
 
+def migrate_schema(app):
+    if not app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite:///"):
+        return
+    with db.engine.connect() as connection:
+        line_columns = {row[1] for row in connection.exec_driver_sql("PRAGMA table_info(line)").fetchall()}
+        if "customer_id" not in line_columns:
+            connection.exec_driver_sql("ALTER TABLE line ADD COLUMN customer_id INTEGER")
+        remote_columns = {row[1] for row in connection.exec_driver_sql("PRAGMA table_info(remote_access)").fetchall()}
+        if "customer_id" not in remote_columns:
+            connection.exec_driver_sql("ALTER TABLE remote_access ADD COLUMN customer_id INTEGER")
+        connection.commit()
+
+
 def create_app():
     load_dotenv()
     app = Flask(__name__, instance_relative_config=True)
@@ -44,6 +57,7 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        migrate_schema(app)
         User.ensure_default_admin()
 
     return app

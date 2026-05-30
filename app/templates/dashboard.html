@@ -3,7 +3,7 @@
 <div class="page-head"><h1>仪表盘</h1><a class="btn btn-primary" href="{{ url_for('main.export_excel') }}">导出 Excel</a></div>
 <div class="stats-grid">
   <div class="stat"><span>总客户数量</span><strong>{{ stats.customers }}</strong></div>
-  <div class="stat"><span>总设备数量</span><strong>{{ stats.devices }}</strong></div>
+  <div class="stat"><span>总线路数量</span><strong>{{ stats.lines }}</strong></div>
   <div class="stat warn"><span>7天内到期</span><strong>{{ stats.expiring_7 }}</strong></div>
   <div class="stat danger"><span>3天内到期</span><strong>{{ stats.expiring_3 }}</strong></div>
   <div class="stat dark"><span>已到期</span><strong>{{ stats.expired }}</strong></div>

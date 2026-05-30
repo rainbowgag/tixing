@@ -3,7 +3,7 @@
 <div class="page-head"><h1>{{ "编辑远程信息" if item.id else "新增远程信息" }}</h1></div>
 <form class="form-panel" method="post">
   <div class="row g-3">
-    <div class="col-md-6"><label class="form-label">所属设备</label><select class="form-select" name="device_id" required>{% for d in devices %}<option value="{{ d.id }}" {% if item.device_id==d.id %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-6"><label class="form-label">所属客户</label><select class="form-select" name="customer_id" required><option value="">请选择客户</option>{% for c in customers %}<option value="{{ c.id }}" {% if customer_id==c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
     <div class="col-md-6"><label class="form-label">远程地址</label><input class="form-control" name="address" value="{{ item.address or '' }}" required></div>
     <div class="col-md-6"><label class="form-label">用户名</label><input class="form-control" name="username" value="{{ item.username or '' }}"></div>
     <div class="col-md-6"><label class="form-label">密码</label><input class="form-control" name="password" value="{{ item.password or '' }}"></div>

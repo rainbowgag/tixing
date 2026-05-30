@@ -5,4 +5,14 @@
   <div><b>联系人</b><span>{{ item.contact }}</span></div><div><b>微信</b><span>{{ item.wechat }}</span></div><div><b>Telegram</b><span>{{ item.telegram }}</span></div><div><b>邮箱</b><span>{{ item.email }}</span></div><div><b>手机号</b><span>{{ item.phone }}</span></div><div><b>状态</b><span>{{ item.status }}</span></div>
 </div>
 <h2 class="section-title">备注</h2><p class="text-break">{{ item.remark or "无" }}</p>
+<h2 class="section-title">客户线路</h2>
+<div class="table-responsive"><table class="table table-hover align-middle">
+<thead><tr><th>线路编号</th><th>国家</th><th>线路类型</th><th>备注</th></tr></thead>
+<tbody>{% for line in lines %}<tr><td><a href="{{ url_for('main.line_form', item_id=line.id) }}">{% if line.code.startswith("http://") or line.code.startswith("https://") %}{{ line.code }}{% else %}{{ line.code }}{% endif %}</a></td><td>{{ line.country }}</td><td>{{ line.line_type }}</td><td>{{ line.remark }}</td></tr>{% else %}<tr><td colspan="4" class="text-secondary">暂无线路</td></tr>{% endfor %}</tbody>
+</table></div>
+<h2 class="section-title">远程信息</h2>
+<div class="table-responsive"><table class="table table-hover align-middle">
+<thead><tr><th>远程地址</th><th>用户名</th><th>备注</th></tr></thead>
+<tbody>{% for remote in remotes %}<tr><td><a href="{{ url_for('main.remote_form', item_id=remote.id) }}">{{ remote.address }}</a></td><td>{{ remote.username }}</td><td>{{ remote.remark }}</td></tr>{% else %}<tr><td colspan="3" class="text-secondary">暂无远程信息</td></tr>{% endfor %}</tbody>
+</table></div>
 {% endblock %}

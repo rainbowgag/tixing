@@ -75,9 +75,9 @@ def export_workbook():
         ws.append([item.name, item.customer.name if item.customer else "", item.country, item.device_type, item.remark, item.created_at, item.updated_at])
 
     ws = wb.create_sheet("线路")
-    ws.append(["线路编号", "国家", "线路类型", "备注", "创建时间", "更新时间"])
+    ws.append(["所属客户", "线路编号", "国家", "线路类型", "备注", "创建时间", "更新时间"])
     for item in Line.query.order_by(Line.id.desc()).all():
-        ws.append([item.code, item.country, item.line_type, item.remark, item.created_at, item.updated_at])
+        ws.append([item.customer.name if item.customer else "", item.code, item.country, item.line_type, item.remark, item.created_at, item.updated_at])
 
     ws = wb.create_sheet("续费记录")
     ws.append(["客户", "设备", "线路", "价格", "开通时间", "到期时间", "状态", "备注"])

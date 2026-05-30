@@ -3,6 +3,7 @@
 <div class="page-head"><h1>{{ "编辑线路" if item.id else "新增线路" }}</h1></div>
 <form class="form-panel" method="post">
   <div class="row g-3">
+    <div class="col-md-6"><label class="form-label">所属客户</label><select class="form-select" name="customer_id" required><option value="">请选择客户</option>{% for c in customers %}<option value="{{ c.id }}" {% if item.customer_id==c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
     <div class="col-md-6"><label class="form-label">线路编号</label><input class="form-control" name="code" value="{{ item.code or '' }}" required></div>
     <div class="col-md-6"><label class="form-label">国家</label><input class="form-control" name="country" value="{{ item.country or '' }}"></div>
     <div class="col-md-6"><label class="form-label">线路类型</label><input class="form-control" name="line_type" value="{{ item.line_type or '' }}"></div>

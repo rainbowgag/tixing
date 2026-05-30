@@ -46,6 +46,8 @@ class Customer(TimestampMixin, db.Model):
     status = db.Column(db.String(20), default="正常")
     remark = db.Column(db.Text, default="")
     devices = db.relationship("Device", backref="customer", lazy=True)
+    lines = db.relationship("Line", backref="customer", lazy=True)
+    remotes = db.relationship("RemoteAccess", backref="customer", lazy=True)
     renewals = db.relationship("Renewal", backref="customer", lazy=True)
 
 
@@ -62,6 +64,7 @@ class Device(TimestampMixin, db.Model):
 
 class Line(TimestampMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey("customer.id"), nullable=True)
     code = db.Column(db.String(120), nullable=False, index=True)
     country = db.Column(db.String(80), default="")
     line_type = db.Column(db.String(120), default="")
@@ -71,11 +74,16 @@ class Line(TimestampMixin, db.Model):
 
 class RemoteAccess(TimestampMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey("customer.id"), nullable=True)
+    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=True)
     address = db.Column(db.String(255), nullable=False, index=True)
     username = db.Column(db.String(120), default="")
     password = db.Column(db.String(255), default="")
     remark = db.Column(db.Text, default="")
+
+    @property
+    def owner_customer(self):
+        return self.customer or (self.device.customer if self.device else None)
 
 
 class Renewal(TimestampMixin, db.Model):
