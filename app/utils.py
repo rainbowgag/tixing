@@ -100,7 +100,8 @@ def export_workbook():
 
 
 def send_reminder_email():
-    notices = [r for r in Renewal.query.all() if r.status != "已续费" and (r.days_left in [7, 3, 1] or r.days_left < 0)]
+    remind_days = {7, 3, 2, 1}
+    notices = [r for r in Renewal.query.all() if r.status != "已续费" and (r.days_left in remind_days or r.days_left < 0)]
     if not notices:
         return 0
     admin = User.query.first()
