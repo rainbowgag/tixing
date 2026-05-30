@@ -6,6 +6,8 @@ APP_DIR="/opt/${APP_NAME}"
 APP_USER="linecrm"
 DOMAIN="t.yaml.uk"
 SERVER_NAME="t.yaml.uk"
+HTTP_PORT="80"
+ENABLE_CERTBOT="true"
 REPO_URL=""
 EMAIL=""
 ADMIN_USER="admin"
@@ -15,6 +17,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo) REPO_URL="$2"; shift 2 ;;
     --domain) DOMAIN="$2"; SERVER_NAME="$2"; shift 2 ;;
+    --port) HTTP_PORT="$2"; shift 2 ;;
+    --no-cert) ENABLE_CERTBOT="false"; shift ;;
     --email) EMAIL="$2"; shift 2 ;;
     --admin-user) ADMIN_USER="$2"; shift 2 ;;
     --admin-password) ADMIN_PASSWORD="$2"; shift 2 ;;
@@ -23,7 +27,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$REPO_URL" || -z "$EMAIL" || -z "$ADMIN_PASSWORD" ]]; then
-  echo "Usage: sudo bash install.sh --repo https://github.com/user/repo.git --domain t.yaml.uk --email admin@example.com --admin-user admin --admin-password 'strong-password'"
+  echo "Usage: sudo bash install.sh --repo https://github.com/user/repo.git --domain t.yaml.uk --port 8080 --no-cert --email admin@example.com --admin-user admin --admin-password 'strong-password'"
   exit 1
 fi
 
@@ -143,7 +147,7 @@ EOF
 
 cat > /etc/nginx/sites-available/${APP_NAME} <<EOF
 server {
-    listen 80;
+    listen ${HTTP_PORT};
     server_name ${SERVER_NAME};
 
     client_max_body_size 20m;
@@ -163,9 +167,18 @@ systemctl enable --now ${APP_NAME}
 systemctl enable --now ${APP_NAME}-reminder.timer
 systemctl enable --now ${APP_NAME}-backup.timer
 nginx -t
-systemctl reload nginx
+systemctl enable nginx
+systemctl restart nginx
 
-certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$EMAIL" --redirect
+if [[ "$ENABLE_CERTBOT" == "true" && "$HTTP_PORT" == "80" ]]; then
+  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$EMAIL" --redirect
+else
+  echo "Certbot skipped. It requires port 80 for the default HTTP challenge."
+fi
 
-echo "Installed successfully: https://${DOMAIN}"
+if [[ "$ENABLE_CERTBOT" == "true" && "$HTTP_PORT" == "80" ]]; then
+  echo "Installed successfully: https://${DOMAIN}"
+else
+  echo "Installed successfully: http://${DOMAIN}:${HTTP_PORT}"
+fi
 echo "Config file: ${APP_DIR}/.env"
