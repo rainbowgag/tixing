@@ -1,4 +1,5 @@
 import os
+from calendar import monthrange
 from datetime import datetime
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, send_file, url_for
@@ -27,6 +28,13 @@ def ensure_customer_device(customer_id):
     db.session.add(device)
     db.session.flush()
     return device.id
+
+
+def add_one_month(value):
+    year = value.year + (1 if value.month == 12 else 0)
+    month = 1 if value.month == 12 else value.month + 1
+    day = min(value.day, monthrange(year, month)[1])
+    return value.replace(year=year, month=month, day=day)
 
 
 @bp.route("/")
@@ -262,6 +270,17 @@ def renewal_delete(item_id):
     db.session.commit()
     flash("续费记录已删除", "success")
     return redirect(url_for("main.renewals"))
+
+
+@bp.route("/renewals/<int:item_id>/renew", methods=["POST"])
+@login_required
+def renewal_mark_renewed(item_id):
+    item = Renewal.query.get_or_404(item_id)
+    item.expire_date = add_one_month(item.expire_date)
+    item.status = "正常"
+    db.session.commit()
+    flash(f"{item.customer.name} 已续费，到期时间已延长至 {item.expire_date}", "success")
+    return redirect(request.referrer or url_for("main.dashboard"))
 
 
 @bp.route("/search")

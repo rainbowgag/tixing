@@ -11,12 +11,12 @@
 <h2 class="section-title">最近更新记录</h2>
 <div class="table-responsive">
   <table class="table table-hover align-middle">
-    <thead><tr><th>客户</th><th>设备</th><th>线路</th><th>到期时间</th><th>状态</th><th>更新时间</th></tr></thead>
+    <thead><tr><th>客户</th><th>设备</th><th>线路</th><th>到期时间</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
     <tbody>
     {% for item in recent %}
-      <tr><td>{{ item.customer.name }}</td><td>{{ item.device.name if item.device else "" }}</td><td>{% if item.line and (item.line.code.startswith("http://") or item.line.code.startswith("https://")) %}<a href="{{ item.line.code }}" target="_blank" rel="noopener noreferrer">{{ item.line.code }}</a>{% else %}{{ item.line.code if item.line else "" }}{% endif %}</td><td>{{ item.expire_date }}</td><td>{{ item.computed_status }}</td><td>{{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}</td></tr>
+      <tr><td><a href="{{ url_for('main.customer_detail', item_id=item.customer.id) }}">{{ item.customer.name }}</a></td><td>{{ item.device.name if item.device else "" }}</td><td>{% if item.line and (item.line.code.startswith("http://") or item.line.code.startswith("https://")) %}<a href="{{ item.line.code }}" target="_blank" rel="noopener noreferrer">{{ item.line.code }}</a>{% else %}{{ item.line.code if item.line else "" }}{% endif %}</td><td>{{ item.expire_date }}</td><td>{{ item.computed_status }}</td><td>{{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}</td><td><form method="post" action="{{ url_for('main.renewal_mark_renewed', item_id=item.id) }}"><button class="btn btn-sm btn-success" type="submit">已续费</button></form></td></tr>
     {% else %}
-      <tr><td colspan="6" class="text-secondary">暂无记录</td></tr>
+      <tr><td colspan="7" class="text-secondary">暂无记录</td></tr>
     {% endfor %}
     </tbody>
   </table>
