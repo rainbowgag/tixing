@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 
 from .models import Customer, Device, Line, RemoteAccess, Renewal, db
@@ -270,6 +270,9 @@ def backup_create():
 @bp.route("/backups/<name>")
 @login_required
 def backup_download(name):
+    backups = {item["name"] for item in list_backups()}
+    if name not in backups or not name.endswith(".db"):
+        abort(404)
     backup_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backups"))
     return send_file(os.path.join(backup_dir, name), as_attachment=True)
 
