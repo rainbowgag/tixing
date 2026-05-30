@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><h1>续费管理</h1><a class="btn btn-primary" href="{{ url_for('main.renewal_form') }}">新增续费记录</a></div>
+<form class="list-search"><input class="form-control" name="q" value="{{ q }}" placeholder="搜索续费记录"><button class="btn btn-outline-secondary">搜索</button></form>
+<div class="table-responsive"><table class="table table-hover align-middle">
+<thead><tr><th>客户</th><th>设备</th><th>线路</th><th>价格</th><th>开通时间</th><th>到期时间</th><th>剩余天数</th><th>状态</th><th>操作</th></tr></thead>
+<tbody>{% for item in items %}<tr><td>{{ item.customer.name }}</td><td>{{ item.device.name if item.device else "" }}</td><td>{{ item.line.code if item.line else "" }}</td><td>{{ item.price }}</td><td>{{ item.start_date or "" }}</td><td>{{ item.expire_date }}</td><td>{{ item.days_left }}</td><td>{{ item.computed_status }}</td><td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.renewal_form', item_id=item.id) }}">编辑</a> {% with action=url_for('main.renewal_delete', item_id=item.id) %}{% include "_delete.html" %}{% endwith %}</td></tr>{% else %}<tr><td colspan="9" class="text-secondary">暂无数据</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><h1>设备管理</h1><a class="btn btn-primary" href="{{ url_for('main.device_form') }}">新增设备</a></div>
+<form class="list-search"><input class="form-control" name="q" value="{{ q }}" placeholder="搜索设备"><button class="btn btn-outline-secondary">搜索</button></form>
+<div class="table-responsive"><table class="table table-hover align-middle">
+<thead><tr><th>设备名称</th><th>客户</th><th>国家</th><th>类型</th><th>备注</th><th>操作</th></tr></thead>
+<tbody>{% for item in items %}<tr><td><a href="{{ url_for('main.device_detail', item_id=item.id) }}">{{ item.name }}</a></td><td>{{ item.customer.name if item.customer else "" }}</td><td>{{ item.country }}</td><td>{{ item.device_type }}</td><td>{{ item.remark }}</td><td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.device_form', item_id=item.id) }}">编辑</a> {% with action=url_for('main.device_delete', item_id=item.id) %}{% include "_delete.html" %}{% endwith %}</td></tr>{% else %}<tr><td colspan="6" class="text-secondary">暂无数据</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

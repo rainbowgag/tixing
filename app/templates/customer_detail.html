@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><h1>{{ item.name }}</h1><a class="btn btn-outline-primary" href="{{ url_for('main.customer_form', item_id=item.id) }}">编辑</a></div>
+<div class="detail-grid">
+  <div><b>联系人</b><span>{{ item.contact }}</span></div><div><b>微信</b><span>{{ item.wechat }}</span></div><div><b>Telegram</b><span>{{ item.telegram }}</span></div><div><b>邮箱</b><span>{{ item.email }}</span></div><div><b>手机号</b><span>{{ item.phone }}</span></div><div><b>状态</b><span>{{ item.status }}</span></div>
+</div>
+<h2 class="section-title">备注</h2><p class="text-break">{{ item.remark or "无" }}</p>
+{% endblock %}

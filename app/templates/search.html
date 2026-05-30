@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><h1>全局搜索</h1></div>
+<form class="list-search"><input class="form-control" name="q" value="{{ q }}" placeholder="输入关键词"><button class="btn btn-primary">搜索</button></form>
+{% if q %}
+  <h2 class="section-title">客户</h2>
+  <ul class="result-list">{% for i in results.customers %}<li><a href="{{ url_for('main.customer_detail', item_id=i.id) }}">{{ i.name }}</a><span>{{ i.remark }}</span></li>{% else %}<li>无结果</li>{% endfor %}</ul>
+  <h2 class="section-title">设备</h2>
+  <ul class="result-list">{% for i in results.devices %}<li><a href="{{ url_for('main.device_detail', item_id=i.id) }}">{{ i.name }}</a><span>{{ i.remark }}</span></li>{% else %}<li>无结果</li>{% endfor %}</ul>
+  <h2 class="section-title">线路</h2>
+  <ul class="result-list">{% for i in results.lines %}<li>{{ i.code }}<span>{{ i.remark }}</span></li>{% else %}<li>无结果</li>{% endfor %}</ul>
+  <h2 class="section-title">远程地址</h2>
+  <ul class="result-list">{% for i in results.remotes %}<li>{{ i.address }}<span>{{ i.remark }}</span></li>{% else %}<li>无结果</li>{% endfor %}</ul>
+{% endif %}
+{% endblock %}

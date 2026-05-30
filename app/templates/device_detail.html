@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><h1>{{ item.name }}</h1><a class="btn btn-outline-primary" href="{{ url_for('main.device_form', item_id=item.id) }}">编辑</a></div>
+<div class="detail-grid"><div><b>所属客户</b><span>{{ item.customer.name if item.customer else "" }}</span></div><div><b>国家</b><span>{{ item.country }}</span></div><div><b>设备类型</b><span>{{ item.device_type }}</span></div></div>
+<h2 class="section-title">备注</h2><p>{{ item.remark or "无" }}</p>
+{% endblock %}

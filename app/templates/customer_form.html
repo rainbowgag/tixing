@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><h1>{{ "编辑客户" if item.id else "新增客户" }}</h1></div>
+<form class="form-panel" method="post">
+  <div class="row g-3">
+    <div class="col-md-6"><label class="form-label">客户名称</label><input class="form-control" name="name" value="{{ item.name or '' }}" required></div>
+    <div class="col-md-6"><label class="form-label">联系人</label><input class="form-control" name="contact" value="{{ item.contact or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">微信</label><input class="form-control" name="wechat" value="{{ item.wechat or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">Telegram</label><input class="form-control" name="telegram" value="{{ item.telegram or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">手机号</label><input class="form-control" name="phone" value="{{ item.phone or '' }}"></div>
+    <div class="col-md-8"><label class="form-label">邮箱</label><input class="form-control" name="email" value="{{ item.email or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">状态</label><select class="form-select" name="status">{% for s in ["正常","暂停","已到期","删除"] %}<option {% if item.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="col-12"><label class="form-label">备注</label><textarea class="form-control" name="remark" rows="4">{{ item.remark or '' }}</textarea></div>
+  </div>
+  <button class="btn btn-primary mt-4">保存</button>
+</form>
+{% endblock %}
