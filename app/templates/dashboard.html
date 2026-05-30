@@ -14,7 +14,7 @@
     <thead><tr><th>客户</th><th>设备</th><th>线路</th><th>到期时间</th><th>状态</th><th>更新时间</th></tr></thead>
     <tbody>
     {% for item in recent %}
-      <tr><td>{{ item.customer.name }}</td><td>{{ item.device.name if item.device else "" }}</td><td>{{ item.line.code if item.line else "" }}</td><td>{{ item.expire_date }}</td><td>{{ item.computed_status }}</td><td>{{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}</td></tr>
+      <tr><td>{{ item.customer.name }}</td><td>{{ item.device.name if item.device else "" }}</td><td>{% if item.line and (item.line.code.startswith("http://") or item.line.code.startswith("https://")) %}<a href="{{ item.line.code }}" target="_blank" rel="noopener noreferrer">{{ item.line.code }}</a>{% else %}{{ item.line.code if item.line else "" }}{% endif %}</td><td>{{ item.expire_date }}</td><td>{{ item.computed_status }}</td><td>{{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}</td></tr>
     {% else %}
       <tr><td colspan="6" class="text-secondary">暂无记录</td></tr>
     {% endfor %}

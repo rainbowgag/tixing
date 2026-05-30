@@ -4,6 +4,6 @@
 <form class="list-search"><input class="form-control" name="q" value="{{ q }}" placeholder="搜索线路"><button class="btn btn-outline-secondary">搜索</button></form>
 <div class="table-responsive"><table class="table table-hover align-middle">
 <thead><tr><th>线路编号</th><th>国家</th><th>线路类型</th><th>备注</th><th>操作</th></tr></thead>
-<tbody>{% for item in items %}<tr><td>{{ item.code }}</td><td>{{ item.country }}</td><td>{{ item.line_type }}</td><td>{{ item.remark }}</td><td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.line_form', item_id=item.id) }}">编辑</a> {% with action=url_for('main.line_delete', item_id=item.id) %}{% include "_delete.html" %}{% endwith %}</td></tr>{% else %}<tr><td colspan="5" class="text-secondary">暂无数据</td></tr>{% endfor %}</tbody>
+<tbody>{% for item in items %}<tr><td>{% if item.code.startswith("http://") or item.code.startswith("https://") %}<a href="{{ item.code }}" target="_blank" rel="noopener noreferrer">{{ item.code }}</a>{% else %}{{ item.code }}{% endif %}</td><td>{{ item.country }}</td><td>{{ item.line_type }}</td><td>{{ item.remark }}</td><td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.line_form', item_id=item.id) }}">编辑</a> {% with action=url_for('main.line_delete', item_id=item.id) %}{% include "_delete.html" %}{% endwith %}</td></tr>{% else %}<tr><td colspan="5" class="text-secondary">暂无数据</td></tr>{% endfor %}</tbody>
 </table></div>
 {% endblock %}

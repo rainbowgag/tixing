@@ -99,9 +99,13 @@ def export_workbook():
     return stream
 
 
-def send_reminder_email():
+def get_reminder_notices():
     remind_days = {7, 3, 2, 1}
-    notices = [r for r in Renewal.query.all() if r.status != "已续费" and (r.days_left in remind_days or r.days_left < 0)]
+    return [r for r in Renewal.query.all() if r.status != "已续费" and (r.days_left in remind_days or r.days_left < 0)]
+
+
+def send_reminder_email():
+    notices = get_reminder_notices()
     if not notices:
         return 0
     admin = User.query.first()
@@ -132,7 +136,7 @@ def send_reminder_email():
 
     server = os.getenv("MAIL_SERVER")
     username = os.getenv("MAIL_USERNAME")
-    password = os.getenv("MAIL_PASSWORD")
+    password = (os.getenv("MAIL_PASSWORD") or "").replace(" ", "")
     if not server or not username or not password:
         return 0
     port = int(os.getenv("MAIL_PORT", "587"))
