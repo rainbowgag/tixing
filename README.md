@@ -51,6 +51,45 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records
 
 证书由 VPS 上的安装脚本通过 Certbot 自动申请。
 
+## 多 VPS 主备备份
+
+当前系统使用 SQLite，推荐一台主 VPS 写数据，其他 VPS 做备用机，不建议多台同时写。
+
+备用 VPS 初始化，每台备用机执行一次：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rainbowgag/tixing/main/deploy/setup-standby.sh | sudo bash -s -- \
+  --domain t.yaml.uk \
+  --port 25531 \
+  --email 708805226@qq.com \
+  --admin-user admin \
+  --admin-password '请改成强密码'
+```
+
+主 VPS 安装同步任务，把 IP 换成三台备用 VPS 的 IP：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rainbowgag/tixing/main/deploy/setup-primary-sync.sh | sudo bash -s -- \
+  --replicas 'root@备用IP1,root@备用IP2,root@备用IP3' \
+  --interval 30 \
+  --keep 6
+```
+
+同步任务只同步 `/opt/line-crm/data/app.db` 和 `/opt/line-crm/.env`，不会同步虚拟环境、缓存、日志或历史大文件。主 VPS 本地只保留最近 6 个同步快照，备用 VPS 的邮件提醒和本地备份定时器默认关闭，避免重复发邮件和占用硬盘。
+
+手动同步：
+
+```bash
+sudo /usr/local/sbin/linecrm-sync-replicas.sh
+```
+
+查看同步状态：
+
+```bash
+systemctl status linecrm-sync-replicas.timer --no-pager
+journalctl -u linecrm-sync-replicas.service -n 80 --no-pager
+```
+
 ## 本地运行
 
 ```bash
@@ -60,4 +99,3 @@ pip install -r requirements.txt
 copy .env.example .env
 flask --app wsgi:app run
 ```
-
