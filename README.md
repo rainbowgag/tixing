@@ -90,6 +90,14 @@ systemctl status linecrm-sync-replicas.timer --no-pager
 journalctl -u linecrm-sync-replicas.service -n 80 --no-pager
 ```
 
+主 VPS 挂了、备用 VPS 临时接管时，在接管的备用 VPS 上开启续费邮件提醒：
+
+```bash
+sudo systemctl enable --now line-crm-reminder.timer
+```
+
+说明：平时只让主 VPS 开启 `line-crm-reminder.timer`。备用 VPS 默认关闭这个定时器，避免多台服务器同时发送同一条续费提醒邮件。
+
 ## 本地运行
 
 ```bash
